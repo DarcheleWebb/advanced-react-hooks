@@ -28,15 +28,7 @@ function asyncReducer(state, action) {
   }
 }
 
-function useAsync(asyncCallback, initialState, dependencies) {
-  // 🐨 move all the code between the lines into a new useAsync function.
-    // 💰 look below to see how the useAsync hook is supposed to be called
-    // 💰 If you want some help, here's the function signature (or delete this
-    // comment really quick if you don't want the spoiler)!
-    // function useAsync(asyncCallback, initialState, dependencies) {/* code in here */}
-
-    // -------------------------- start --------------------------
-
+function useAsync(asyncCallback, initialState) {
     const [state, dispatch] = React.useReducer(asyncReducer, {
       status: 'idle',
       data: null,
@@ -58,29 +50,27 @@ function useAsync(asyncCallback, initialState, dependencies) {
           dispatch({type: 'rejected', error})
         },
       )
-      // 🐨 you'll accept dependencies as an array and pass that here.
-      // 🐨 because of limitations with ESLint, you'll need to ignore
-      // the react-hooks/exhaustive-deps rule. We'll fix this in an extra credit.
-      // eslint-disable-next-line react-hooks/exhaustive-deps      
-    }, dependencies)
-    // --------------------------- end ---------------------------
+    }, [asyncCallback])
 
     return state
 }
 
 function PokemonInfo({pokemonName}) {
-  // 🐨 here's how you'll use the new useAsync hook you're writing:
-  const state = useAsync(
+  const asyncCallback = React.useCallback(
     () => {
       if (!pokemonName) {
         return
       }
       return fetchPokemon(pokemonName)
     },
-    {status: pokemonName ? 'pending' : 'idle'},
-    [pokemonName],
+    [pokemonName]
   )
-  // 🐨 this will change from "pokemon" to "data"
+
+  const state = useAsync(
+    asyncCallback,
+    {status: pokemonName ? 'pending' : 'idle'}
+  )
+
   const {data : pokemon, status, error} = state
 
   switch (status) {
